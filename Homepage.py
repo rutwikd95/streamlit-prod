@@ -225,7 +225,6 @@ def display_results_from_df(df):
         st.markdown(f"Page **{current_page}** of **{total_pages}** ")
 
     pages = split_frame(df, batch_size)
-    # pagination.dataframe(data=pages[current_page - 1], use_container_width=True)
 
     if not pages:
         st.error("No Results for current filters")
@@ -255,16 +254,6 @@ def display_results_from_df(df):
                     st.markdown(f"IMDB RATING: :red[{imdb_rating}]")
                     st.markdown(f"IMDB VOTES: :red[{imdb_votes}]")
                     st.markdown(f"STREAMING PLATFORM: :red[{streaming_platform}]")
-
-    # current_row_count = limit_data
-    # if current_row_count < total_rows:
-    #     # button_load_more = st.button("Load More", on_click=load_more, args=(total_rows, current_row_count), key="button_load_more")
-    #     # button_load_more = st.button("Load More", on_click=display_results, args=(filtered_data, limit_data + 10),
-    #     #                              key="button_load_more")
-    #     button_load_more = st.button("Load More",key="button_load_more")
-    #     if button_load_more:
-    #         display_results(filtered_data, limit_data + 10)
-
 
 def apply_filters(user_input_name=None, title_type_input=None, streaming_options=None, rating_slider=None, votecount_slider=None):
     df_filtered = pd.DataFrame()
@@ -303,12 +292,6 @@ if __name__ == '__main__':
     streaming_platforms_df = load_streamingplatform_data_to_df()
     all_streaming_options_set = set(streaming_platforms_df["PLATFORM"].to_list())
 
-    # st.write(st.session_state)
-
-
-
-    # use_defaults = st.toggle('Use Default Configuration', value=False, key="use_defaults")
-
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         button_use_default_config = st.button('Use Default Configuration', type="primary", key="use_default_config")
@@ -322,8 +305,6 @@ if __name__ == '__main__':
 
     if button_use_default_config:
         set_defaults_true()
-    # else:
-    #     set_defaults_false()
 
     if button_save_config:
         save_config_to_session()
@@ -348,45 +329,16 @@ if __name__ == '__main__':
     streaming_options = st.multiselect(
         'Streaming Platforms',
         all_streaming_options_set, key="streaming_options")
-    # st.write('You selected:', streaming_options)
 
     # TMDB_RATINGS Filter
     rating_slider = st.slider('Select Min Max Rating value', min_value=0.0, max_value=10.0, value=(0.0, 10.0), step=0.10,
                               key="rating_slider")
-    # st.write('Values:', rating_slider)
 
     # TMDB_VOTECOUNT Filter
     votecount_slider = st.slider('Select Min Max Votes value', min_value=0, max_value=5000000, value=(0, 5000000),
                                  key="votecount_slider")
-    # st.write('Values:', votecount_slider)
-
-    # # APPLY ALL FILTERS FROM USER
-    # filtered_data = filter_data_by_name_to_df(user_input_name, streaming_options, rating_slider, votecount_slider)
-    # if len(filtered_data) > 0:
-    #     total_rows = len(filtered_data)
-    #     st.write(f"Total Results: :red[{total_rows}]")
-    #     # if "incremental_limit" not in st.session_state:
-    #     if total_rows > 10:
-    #         st.session_state.incremental_limit = 10
-    #     else:
-    #         st.session_state.incremental_limit = total_rows
-    #
-    #     limit_data = st.session_state.incremental_limit
-    #     st.write(f"Limit data : {limit_data}")
-    #
-    #     if total_rows > 10:
-    #         limit_data = 10
-    #     else:
-    #         limit_data = total_rows
-    #     display_results(filtered_data, limit_data)
-    #
-    #     # current_row_count = st.session_state.incremental_limit
-    #     # st.write(f"Current row count: {current_row_count}")
-    #
-    # else:
-    #     st.info('No Matching Data Found')
 
     df_filtered = apply_filters(user_input_name, title_type_input, streaming_options, rating_slider, votecount_slider)
     sorted_df = df_filtered.sort_values(by='IMDB_RATING', ascending=False)
-    st.dataframe(df_filtered.head())
+    # st.dataframe(df_filtered.head())
     display_results_from_df(df_filtered)
