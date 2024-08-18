@@ -143,7 +143,7 @@ else:
 
     with col2:
         countries = get_countries()
-        selected_country = st.multiselect("Country", countries, countries)
+        selected_country = st.multiselect("Country", countries)
 
     with col3:
         min_year, max_year = st.slider("Select Min Max Year value", 1980, 2024, (1980, 2024), 1)
