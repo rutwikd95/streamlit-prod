@@ -18,6 +18,20 @@ def fetch_data(query, params=()):
     return pd.read_sql_query(query, conn, params=params)
 
 
+def get_genres():
+    query = """
+    SELECT DISTINCT GENRES FROM genres 
+    """
+    genres = fetch_data(query)
+    return genres['GENRES'].tolist()
+
+def get_countries():
+    query = """
+    SELECT DISTINCT COUNTRIES FROM countries 
+    """
+    countries = fetch_data(query)
+    return countries['COUNTRIES'].tolist()
+
 # Check if required tables exist
 tables = ['imdb_tmdb_movies', 'imdb_tmdb_tv', 'streaming_platforms']
 missing_tables = [table for table in tables if not table_exists(table)]
@@ -121,21 +135,35 @@ else:
         sort_by = st.selectbox("Sort By", ["IMDB_RATING", "IMDB_VOTES"])
         sort_direction = st.radio("Direction", ["Ascending", "Descending"], index=1)
 
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        genres = get_genres()
+        selected_genre = st.multiselect("Genre", genres)
+
+    with col2:
+        countries = get_countries()
+        selected_country = st.multiselect("Country", countries, countries)
+
+    with col3:
+        min_year, max_year = st.slider("Select Min Max Year value", 1980, 2024, (1980, 2024), 1)
+
     # Filter query
     filter_query = """
     SELECT * FROM (
-        SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM
+        SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM, GENRES, ORIGIN_COUNTRY, RELEASE_DATE
         FROM imdb_tmdb_movies
         UNION ALL
-        SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM
+        SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM, GENRES, ORIGIN_COUNTRY, RELEASE_DATE
         FROM imdb_tmdb_tv
     )
     WHERE IMDB_RATING BETWEEN ? AND ?
     AND IMDB_VOTES BETWEEN ? AND ?
+    AND RELEASE_DATE BETWEEN ? AND ?
     """
 
     # Apply streaming platform filter
-    params = [min_rating, max_rating, min_votes, max_votes]
+    params = [min_rating, max_rating, min_votes, max_votes, min_year, max_year]
     if selected_platforms:
         platforms_filter = " AND (" + " OR ".join(["STREAMING_PLATFORM LIKE ?" for _ in selected_platforms]) + ")"
         filter_query += platforms_filter
@@ -144,12 +172,21 @@ else:
         title_type_filter = " AND (" + " OR ".join(["TITLE_TYPE LIKE ?" for _ in selected_title_type]) + ")"
         filter_query += title_type_filter
         params.extend(['%' + type + '%' for type in selected_title_type])
+    if selected_genre:
+        genre_filter = " AND (" + " OR ".join(["GENRES LIKE ?" for _ in selected_genre]) + ")"
+        filter_query += genre_filter
+        params.extend(['%' + genre + '%' for genre in selected_genre])
+    if selected_country:
+        country_filter = " AND (" + " OR ".join(["ORIGIN_COUNTRY LIKE ?" for _ in selected_country]) + ")"
+        filter_query += country_filter
+        params.extend(['%' + country + '%' for country in selected_country])
 
     # Apply sorting
     filter_query += f" ORDER BY {sort_by} {'ASC' if sort_direction == 'Ascending' else 'DESC'}"
 
     # Fetch filtered results
     filtered_results = fetch_data(filter_query, params)
+    # st.write(filtered_results.columns)
 
     # Pagination for filtered results
     if 'filtered_results_page' not in st.session_state:
@@ -174,6 +211,9 @@ else:
             st.write(f"Title Type: {row['TITLE_TYPE']}")
             st.write(f"IMDB Rating: {row['IMDB_RATING']}, Votes: {row['IMDB_VOTES']}")
             st.write(f"Streaming Platforms: {row['STREAMING_PLATFORM']}")
+            st.write(f"Genre: {row['GENRES']}")
+            st.write(f"Origin Country: {row['ORIGIN_COUNTRY']}")
+            st.write(f"Release Date: {row['RELEASE_DATE']}")
         st.write("---")
 
     display_pagination_buttons(filtered_results_page, total_filtered_pages, 'filtered_results_page',
