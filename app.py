@@ -76,10 +76,10 @@ else:
         search_results = fetch_data(
             """
             SELECT * FROM (
-                SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM
+                SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM, GENRES, ORIGIN_COUNTRY, RELEASE_DATE, OVERVIEW
                 FROM imdb_tmdb_movies
                 UNION ALL
-                SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM
+                SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM, GENRES, ORIGIN_COUNTRY, RELEASE_DATE, OVERVIEW
                 FROM imdb_tmdb_tv
             )
             WHERE TITLE LIKE ?
@@ -109,6 +109,11 @@ else:
                 st.write(f"Title Type: {row['TITLE_TYPE']}")
                 st.write(f"IMDB Rating: {row['IMDB_RATING']}, Votes: {row['IMDB_VOTES']}")
                 st.write(f"Streaming Platforms: {row['STREAMING_PLATFORM']}")
+                st.write(f"Genre: {row['GENRES']}")
+                st.write(f"Origin Country: {row['ORIGIN_COUNTRY']}")
+                st.write(f"Release Date: {row['RELEASE_DATE']}")
+                with st.expander("Description:"):
+                    st.write(f"{row['OVERVIEW']}")
             st.write("---")
 
         display_pagination_buttons(search_results_page, total_search_pages, 'search_results_page',
@@ -151,10 +156,10 @@ else:
     # Filter query
     filter_query = """
     SELECT * FROM (
-        SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM, GENRES, ORIGIN_COUNTRY, RELEASE_DATE
+        SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM, GENRES, ORIGIN_COUNTRY, RELEASE_DATE, OVERVIEW
         FROM imdb_tmdb_movies
         UNION ALL
-        SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM, GENRES, ORIGIN_COUNTRY, RELEASE_DATE
+        SELECT IMDB_ID, IMDB_RATING, IMDB_VOTES, TITLE_TYPE, TITLE, POSTER_PATH, STREAMING_PLATFORM, GENRES, ORIGIN_COUNTRY, RELEASE_DATE, OVERVIEW
         FROM imdb_tmdb_tv
     )
     WHERE IMDB_RATING BETWEEN ? AND ?
@@ -214,6 +219,9 @@ else:
             st.write(f"Genre: {row['GENRES']}")
             st.write(f"Origin Country: {row['ORIGIN_COUNTRY']}")
             st.write(f"Release Date: {row['RELEASE_DATE']}")
+            # st.write(f"Overview: {row['OVERVIEW']}")
+            with st.expander("Description:"):
+                st.write(f"{row['OVERVIEW']}")
         st.write("---")
 
     display_pagination_buttons(filtered_results_page, total_filtered_pages, 'filtered_results_page',
