@@ -122,14 +122,14 @@ else:
         selected_title_type = st.multiselect("Streaming Platforms", ["MOVIE","TV"], default=["MOVIE","TV"])
 
     with col2:
-        min_rating, max_rating = st.slider("Select Min Max Rating value", 0.0, 10.0, (0.0, 10.0), 0.1)
+        min_rating, max_rating = st.slider("Select Min Max Rating value", 0.0, 10.0, (7.0, 10.0), 0.1)
 
     with col3:
-        min_votes, max_votes = st.slider("Select Min Max Votes value", 0, 3000000, (0, 3000000), 1000)
+        min_votes, max_votes = st.slider("Select Min Max Votes value", 0, 3000000, (100000, 3000000), 50000)
 
     with col4:
         platforms = get_streaming_platforms()
-        selected_platforms = st.multiselect("Streaming Platforms", platforms)
+        selected_platforms = st.multiselect("Streaming Platforms", platforms, default=["Netflix", "Amazon Prime Video", "Max", "Hulu", "Disney Plus", "Crunchyroll"])
 
     with col5:
         sort_by = st.selectbox("Sort By", ["IMDB_RATING", "IMDB_VOTES"])
